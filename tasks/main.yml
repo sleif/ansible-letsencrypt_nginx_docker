@@ -59,12 +59,12 @@
     line: "{{ item.line }}"
     regexp: "{{ item.regexp }}"
   loop:
-    - { regexp: "^client_max_body_size.*",  line: "client_max_body_size        {{ client_max_body_size }};"  }
+    - { regexp: "^client_max_body_size.*",  line: "client_max_body_size        {{ client_max_body_size }};" }
     #- { regexp: "^proxy_connect_timeout.*", line: "proxy_connect_timeout       601;"  }
     #- { regexp: "^proxy_send_timeout.*",    line: "proxy_send_timeout          601;"  }
     #- { regexp: "^proxy_read_timeout.*",    line: "proxy_read_timeout          601;"  }
     #- { regexp: "^send_timeout.*",          line: "send_timeout                601;"  }
-    - { regexp: "^fastcgi_request_buffering.*",  line: "fastcgi_request_buffering off;"  }
+    - { regexp: "^fastcgi_request_buffering.*",  line: "fastcgi_request_buffering off;" }
   notify: restart_nginx_proxy
   tags: nginx_defaults
 
