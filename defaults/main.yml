@@ -1,0 +1,7 @@
+---
+
+container_storage_dir_base: '/srv'
+nginx_proxy_default_host: ""
+client_max_body_size: "100M"
+nameserver_fallback_needed: true
+DOCKER_NETWORK_NAME: bridge
