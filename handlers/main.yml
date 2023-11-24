@@ -1,4 +1,4 @@
 ---
 
-- name: restart_nginx_proxy
-  command: docker kill -s HUP nginx-proxy
+- name: restart_nginx_proxy  # noqa: no-changed-when
+  ansible.builtin.command: docker kill -s HUP nginx-proxy

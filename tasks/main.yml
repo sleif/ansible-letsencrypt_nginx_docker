@@ -1,14 +1,14 @@
 ---
 
 - name: Port 443 oeffnen
-  firewalld:
+  ansible.posix.firewalld:
     service: https
     permanent: true
     immediate: true
     state: enabled
 
 - name: Port 80 oeffnen
-  firewalld:
+  ansible.posix.firewalld:
     service: http
     permanent: true
     immediate: true
@@ -16,28 +16,28 @@
 
 # enable fallback nameserver in case pihole is running on the same host
 - name: enable fallback nameserver in resolv.conf
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/resolv.conf
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   with_items:
-    - { regexp: '^nameserver 1\.1\.1\.1', line: 'nameserver 1.1.1.1' }
+    - {regexp: '^nameserver 1\.1\.1\.1', line: 'nameserver 1.1.1.1'}
   when: nameserver_fallback_needed | bool
 
 - name: nginx-proxy
-  docker_container:
+  community.docker.docker_container:
     name: nginx-proxy
     image: jwilder/nginx-proxy
     state: started
-    recreate: yes
+    recreate: true
     restart_policy: always
-    restart: yes
-    pull: yes
+    restart: true
+    pull: true
     networks:
-      - name: "{{ DOCKER_NETWORK_NAME }}"
+      - name: "{{ docker_network_name }}"
         aliases:
           - nginx-proxy-container
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     volumes:
       - "{{ container_storage_dir_base }}/nginx/htpasswd:/etc/nginx/htpasswd:ro,Z"
       - "{{ container_storage_dir_base }}/nginx/certs:/etc/nginx/certs:ro,Z"
@@ -53,35 +53,36 @@
       DEFAULT_HOST: "{{ nginx_proxy_default_host }}"
 
 - name: "additional nginx proxy configuration {{ nginx_storage_dir_base }}/nginx/vhost.d/default"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ container_storage_dir_base }}/nginx/vhost.d/default"
-    create: yes
+    create: true
     line: "{{ item.line }}"
     regexp: "{{ item.regexp }}"
+    mode: '0644'
   loop:
-    - { regexp: "^client_max_body_size.*",  line: "client_max_body_size        {{ client_max_body_size }};" }
-    #- { regexp: "^proxy_connect_timeout.*", line: "proxy_connect_timeout       601;"  }
-    #- { regexp: "^proxy_send_timeout.*",    line: "proxy_send_timeout          601;"  }
-    #- { regexp: "^proxy_read_timeout.*",    line: "proxy_read_timeout          601;"  }
-    #- { regexp: "^send_timeout.*",          line: "send_timeout                601;"  }
-    - { regexp: "^fastcgi_request_buffering.*",  line: "fastcgi_request_buffering off;" }
+    - {regexp: "^client_max_body_size.*", line: "client_max_body_size {{ client_max_body_size }};"}
+    # - {regexp: "^proxy_connect_timeout.*", line: "proxy_connect_timeout 601;"}
+    # - {regexp: "^proxy_send_timeout.*",    line: "proxy_send_timeout 601;"}
+    # - {regexp: "^proxy_read_timeout.*",    line: "proxy_read_timeout 601;"}
+    # - {regexp: "^send_timeout.*",          line: "send_timeout 601;"}
+    - {regexp: "^fastcgi_request_buffering.*", line: "fastcgi_request_buffering off;"}
   notify: restart_nginx_proxy
   tags: nginx_defaults
 
 - name: letsencrypt-nginx-proxy-companion-Container starten
-  docker_container:
+  community.docker.docker_container:
     name: nginx-letsencrypt
     image: jrcs/letsencrypt-nginx-proxy-companion
     state: started
     restart_policy: always
-    recreate: yes
-    restart: yes
-    pull: yes
+    recreate: true
+    restart: true
+    pull: true
     networks:
-      - name: "{{ DOCKER_NETWORK_NAME }}"
+      - name: "{{ docker_network_name }}"
         aliases:
           - nginx-letsencrypt-container
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     volumes_from: nginx-proxy
     volumes:
       - "{{ container_storage_dir_base }}/nginx/certs:/etc/nginx/certs:rw,Z"

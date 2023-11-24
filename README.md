@@ -12,7 +12,7 @@ Role Variables
 --------------
 - container_storage_dir_base (/srv)
 - nameserver_fallback_needed (true, in case you want local network independed DNS, example pihole on same docker host)
-- DOCKER_NETWORK_NAME (can be defined in sleif.docker)
+- docker_network_name (can be defined in sleif.docker)
 
 Dependencies
 ------------
@@ -26,7 +26,7 @@ Example Playbook
     - hosts: "server"
       user: root
       vars:
-        DOCKER_NETWORK_NAME: 'custom_docker_network'
+        docker_network_name: 'custom_docker_network'
       roles:
         - { role: sleif.letsencrypt_nginx_docker, tags: "letsencrypt_nginx_docker" }
 
